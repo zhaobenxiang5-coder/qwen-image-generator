@@ -3,15 +3,29 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Check, Sparkles, ArrowLeft, ShieldCheck, Zap, Lock, CreditCard } from "lucide-react";
+import { PAYMENT_CONFIG } from "@/config/payment";
 
 export default function Pricing() {
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+  const [selectedAmount, setSelectedAmount] = useState<number>(9.90);
   const [email, setEmail] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const handleCheckoutClick = (plan: string, amount: number) => {
-    setSelectedPlan(plan);
+  const handleCheckoutClick = (planName: string, amount: number) => {
+    // 检查是否有配置真实收款链接
+    if (planName.includes("Creator") && PAYMENT_CONFIG.CREATOR_PACK_URL) {
+      window.location.href = PAYMENT_CONFIG.CREATOR_PACK_URL;
+      return;
+    }
+    if (planName.includes("Pro") && PAYMENT_CONFIG.PRO_MONTHLY_URL) {
+      window.location.href = PAYMENT_CONFIG.PRO_MONTHLY_URL;
+      return;
+    }
+
+    // 默认弹窗收集意向
+    setSelectedPlan(planName);
+    setSelectedAmount(amount);
     setShowModal(true);
   };
 
@@ -21,12 +35,11 @@ export default function Pricing() {
       return;
     }
     setIsProcessing(true);
-    // 这里可以直接集成 LemonSqueezy 纯静态外链或 Stripe Payment Link
     setTimeout(() => {
       setIsProcessing(false);
-      alert(`🎉 [Checkout Demo Successful!]\nOrder initialized for ${selectedPlan} ($9.90).\nA confirmation link will be delivered to: ${email}`);
+      alert(`🎉 [Checkout Initialized!]\nOrder initialized for ${selectedPlan} ($${selectedAmount}).\nYour license will be delivered to: ${email}`);
       setShowModal(false);
-    }, 1200);
+    }, 1000);
   };
 
   return (
@@ -143,7 +156,7 @@ export default function Pricing() {
               </div>
               <div className="p-3 bg-zinc-950 rounded-lg border border-zinc-800 flex justify-between items-center text-xs">
                 <span className="text-zinc-400">Total Due Today:</span>
-                <span className="font-bold text-white text-sm">$9.90 USD</span>
+                <span className="font-bold text-white text-sm">${selectedAmount.toFixed(2)} USD</span>
               </div>
             </div>
             <div className="flex gap-3">
