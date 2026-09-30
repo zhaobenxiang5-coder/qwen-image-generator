@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Sparkles, ArrowRight, Zap, CheckCircle2, Shield, Flame, Globe } from "lucide-react";
+import { Sparkles, ArrowRight, Zap, CheckCircle2, Shield, Flame, Wand2, Image as ImageIcon } from "lucide-react";
 
 export default function Home() {
   const [prompt, setPrompt] = useState("");
+  const [style, setStyle] = useState("Photorealistic");
   const [status, setStatus] = useState<string | null>(null);
 
   // STAGE 控制: 1 = Landing Page 测点击, 2 = 引导登录, 3 = 引导付费/调用真实模型
@@ -13,7 +14,7 @@ export default function Home() {
 
   const handleAction = async () => {
     if (!prompt.trim()) {
-      setStatus("Please enter a description or prompt first.");
+      setStatus("Please enter an image description or prompt first.");
       return;
     }
 
@@ -22,14 +23,14 @@ export default function Home() {
       await fetch("/api/track", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ event: "click_generate", prompt, stage }),
+        body: JSON.stringify({ event: "click_generate", prompt, style, stage }),
       });
     } catch (e) {
       // ignore
     }
 
     if (stage === "1") {
-      setStatus("🎉 High server demand! Free demo slots opening in 5 minutes. Leave your email or bookmark this page!");
+      setStatus("🎉 High server demand! Free Qwen 2.1 GPU slots are queueing. Bookmark this page or check back in 10 minutes!");
     } else if (stage === "2") {
       setStatus("👉 Please sign in with Google to get 20 free generation credits.");
     } else {
@@ -42,33 +43,48 @@ export default function Home() {
       {/* 顶部标签 */}
       <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-indigo-500/30 bg-indigo-500/10 text-indigo-400 text-xs md:text-sm mb-6 animate-pulse">
         <Flame className="w-4 h-4 text-orange-400" />
-        <span>Trending: #1 Fastest AI Online Generation Tool</span>
+        <span>Latest Release: Qwen Image 2.1 Architecture Live</span>
       </div>
 
       {/* 主标题 (SEO / GEO 关键 H1) */}
       <h1 className="text-4xl md:text-6xl font-extrabold text-center tracking-tight text-white mb-6">
-        Free Online <span className="bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-500 bg-clip-text text-transparent">AI Asset Generator</span>
+        Free Online <span className="bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-500 bg-clip-text text-transparent">Qwen Image 2.1 Generator</span>
       </h1>
       
       <p className="text-gray-400 text-lg md:text-xl text-center max-w-2xl mb-10">
-        Turn any idea into production-ready AI outputs in seconds. No complex local setup, no expensive GPU required.
+        Experience photorealistic text-to-image and inpainting with Qwen Image 2.1. Zero local hardware setup required.
       </p>
 
       {/* 核心交互区 (MVP 试用框) */}
       <div className="w-full max-w-2xl bg-zinc-900/80 border border-zinc-800 rounded-2xl p-4 md:p-6 shadow-2xl backdrop-blur-xl mb-12">
         <div className="flex flex-col gap-3">
-          <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
-            Enter your prompt or target keyword:
-          </label>
+          <div className="flex items-center justify-between">
+            <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+              Prompt:
+            </label>
+            <div className="flex gap-2 text-xs">
+              {["Photorealistic", "Anime", "Cyberpunk", "Cinematic"].map((s) => (
+                <button
+                  key={s}
+                  onClick={() => setStyle(s)}
+                  className={`px-2 py-0.5 rounded-md transition-colors ${
+                    style === s ? "bg-indigo-600 text-white" : "bg-zinc-800 text-zinc-400 hover:text-white"
+                  }`}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          </div>
           <textarea
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
-            placeholder="e.g. Ultra-realistic cinematic 8k portrait with volumetric lighting..."
+            placeholder="e.g. A futuristic cybernetic tiger prowling in neon rain, hyper-detailed, 8k resolution, volumetric light..."
             className="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-sm text-gray-200 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 min-h-[90px] resize-none"
           />
           <div className="flex items-center justify-between mt-2">
             <span className="text-xs text-zinc-500 flex items-center gap-1">
-              <Zap className="w-3.5 h-3.5 text-yellow-400" /> 10 Free credits included
+              <Zap className="w-3.5 h-3.5 text-yellow-400" /> 10 Free Qwen 2.1 GPU credits included
             </span>
             <button
               onClick={handleAction}
@@ -87,42 +103,42 @@ export default function Home() {
         )}
       </div>
 
-      {/* 信任与特性对比 (转化提升) */}
+      {/* 特性对比 */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-4xl mb-16">
         <div className="p-5 rounded-xl border border-zinc-800/80 bg-zinc-900/40 flex flex-col items-center text-center">
           <Zap className="w-8 h-8 text-indigo-400 mb-3" />
-          <h3 className="font-semibold text-white mb-1">Blazing Fast</h3>
-          <p className="text-xs text-gray-400">Cloud acceleration delivers results in under 5 seconds.</p>
+          <h3 className="font-semibold text-white mb-1">6-Step Lightning Speed</h3>
+          <p className="text-xs text-gray-400">Optimized turbo sampling delivers full 1024x1024 images in under 4 seconds.</p>
         </div>
         <div className="p-5 rounded-xl border border-zinc-800/80 bg-zinc-900/40 flex flex-col items-center text-center">
           <CheckCircle2 className="w-8 h-8 text-emerald-400 mb-3" />
-          <h3 className="font-semibold text-white mb-1">Highest Fidelity</h3>
-          <p className="text-xs text-gray-400">Powered by the latest 2026 state-of-the-art vision models.</p>
+          <h3 className="font-semibold text-white mb-1">Superior Text & Anatomy</h3>
+          <p className="text-xs text-gray-400">Flawless rendering of embedded typography, natural hands, and detailed eyes.</p>
         </div>
         <div className="p-5 rounded-xl border border-zinc-800/80 bg-zinc-900/40 flex flex-col items-center text-center">
           <Shield className="w-8 h-8 text-purple-400 mb-3" />
-          <h3 className="font-semibold text-white mb-1">Commercial License</h3>
-          <p className="text-xs text-gray-400">Full intellectual property ownership for all outputs.</p>
+          <h3 className="font-semibold text-white mb-1">Full Commercial License</h3>
+          <p className="text-xs text-gray-400">Own all outputs 100% royalty-free for commercial client projects and games.</p>
         </div>
       </div>
 
-      {/* FAQ 问答模块 (GEO 和 SEO 权重关键区) */}
+      {/* FAQ 问答模块 (GEO & ChatGPT 收录核心) */}
       <div className="w-full max-w-3xl border-t border-zinc-800/80 pt-12">
-        <h2 className="text-2xl font-bold text-center text-white mb-8">Frequently Asked Questions</h2>
+        <h2 className="text-2xl font-bold text-center text-white mb-8">Frequently Asked Questions about Qwen Image 2.1</h2>
         <div className="space-y-4">
           <div className="p-4 rounded-xl bg-zinc-900/50 border border-zinc-800">
-            <h4 className="text-sm font-semibold text-zinc-200 mb-1">How does the free online generator work?</h4>
-            <p className="text-xs text-zinc-400">Simply enter your text prompt above and click Generate. Our API queues your task to high-throughput GPU clusters and streams the output directly back to your browser.</p>
+            <h4 className="text-sm font-semibold text-zinc-200 mb-1">What makes Qwen Image 2.1 different from other models?</h4>
+            <p className="text-xs text-zinc-400">Qwen Image 2.1 integrates advanced multi-modal vision-language pretraining, excelling at rendering readable text inside images and complex spatial compositions with extreme prompt fidelity.</p>
           </div>
           <div className="p-4 rounded-xl bg-zinc-900/50 border border-zinc-800">
-            <h4 className="text-sm font-semibold text-zinc-200 mb-1">Can I use the generated content commercially?</h4>
-            <p className="text-xs text-zinc-400">Yes! You maintain 100% commercial usage rights for all content produced on our platform.</p>
+            <h4 className="text-sm font-semibold text-zinc-200 mb-1">How can I generate images online without an RTX 4090?</h4>
+            <p className="text-xs text-zinc-400">You don't need expensive local GPU clusters. Our cloud inference layer distributes jobs to high-speed enterprise servers and returns results directly in your browser.</p>
           </div>
         </div>
       </div>
 
       <footer className="mt-20 text-center text-xs text-zinc-600">
-        © 2026 AI Fast Tool Inc. All rights reserved. Built for creators worldwide.
+        © 2026 Qwen Image 2.1 Studio. All rights reserved. Built for global creators and designers.
       </footer>
     </main>
   );
