@@ -1,16 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Sparkles, ArrowRight, Zap, CheckCircle2, Shield, Flame, Wand2, Image as ImageIcon } from "lucide-react";
+import { Sparkles, ArrowRight, Zap, CheckCircle2, Shield, Flame, Wand2, Image as ImageIcon, BarChart3 } from "lucide-react";
 
 export default function Home() {
   const [prompt, setPrompt] = useState("");
   const [style, setStyle] = useState("Photorealistic");
   const [status, setStatus] = useState<string | null>(null);
+  const [stats, setStats] = useState<{ totalVisits: number; generateClicks: number }>({ totalVisits: 0, generateClicks: 0 });
 
-  // STAGE 控制: 1 = Landing Page 测点击, 2 = 引导登录, 3 = 引导付费/调用真实模型
   const stage = process.env.NEXT_PUBLIC_MVP_STAGE || "1";
+
+  // 读取本地访问与点击指标
+  useEffect(() => {
+    try {
+      const v = parseInt(localStorage.getItem("mvp_visits") || "0", 10) + 1;
+      localStorage.setItem("mvp_visits", v.toString());
+      const c = parseInt(localStorage.getItem("mvp_clicks") || "0", 10);
+      setStats({ totalVisits: v, generateClicks: c });
+    } catch (e) {}
+  }, []);
 
   const handleAction = async () => {
     if (!prompt.trim()) {
@@ -18,16 +28,18 @@ export default function Home() {
       return;
     }
 
-    // 埋点打点
+    // 本地及服务端统计
     try {
+      const newClicks = stats.generateClicks + 1;
+      localStorage.setItem("mvp_clicks", newClicks.toString());
+      setStats((prev) => ({ ...prev, generateClicks: newClicks }));
+
       await fetch("/api/track", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ event: "click_generate", prompt, style, stage }),
       });
-    } catch (e) {
-      // ignore
-    }
+    } catch (e) {}
 
     if (stage === "1") {
       setStatus("🎉 High server demand! Free Qwen 2.1 GPU slots are queueing. Bookmark this page or check back in 10 minutes!");
@@ -101,6 +113,17 @@ export default function Home() {
             {status}
           </div>
         )}
+
+        {/* 极简实时指标监控窗 */}
+        <div className="mt-4 pt-3 border-t border-zinc-800/60 flex items-center justify-between text-[11px] text-zinc-500">
+          <span className="flex items-center gap-1">
+            <BarChart3 className="w-3 h-3 text-indigo-400" /> Live Interaction Tracker
+          </span>
+          <div className="flex gap-4">
+            <span>Visits: <strong className="text-zinc-300">{stats.totalVisits}</strong></span>
+            <span>Generations: <strong className="text-indigo-400">{stats.generateClicks}</strong></span>
+          </div>
+        </div>
       </div>
 
       {/* 特性对比 */}
@@ -122,7 +145,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* FAQ 问答模块 (GEO & ChatGPT 收录核心) */}
+      {/* FAQ 问答模块 */}
       <div className="w-full max-w-3xl border-t border-zinc-800/80 pt-12">
         <h2 className="text-2xl font-bold text-center text-white mb-8">Frequently Asked Questions about Qwen Image 2.1</h2>
         <div className="space-y-4">
