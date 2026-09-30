@@ -1,10 +1,8 @@
 /** @type {import('next').NextConfig} */
-const isProd = process.env.NODE_ENV === 'production';
-
 const nextConfig = {
   output: 'export',
-  basePath: '/overseas-mvp-pipeline',
-  assetPrefix: '/overseas-mvp-pipeline/',
+  basePath: '/qwen-image-generator',
+  assetPrefix: '/qwen-image-generator/',
   images: {
     unoptimized: true,
   },

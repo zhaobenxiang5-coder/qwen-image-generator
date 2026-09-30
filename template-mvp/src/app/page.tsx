@@ -2,15 +2,13 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Sparkles, ArrowRight, Zap, CheckCircle2, Shield, Flame, Wand2, Image as ImageIcon, BarChart3 } from "lucide-react";
+import { Sparkles, ArrowRight, Zap, CheckCircle2, Shield, Flame, Wand2, Image as ImageIcon, BarChart3, CreditCard } from "lucide-react";
 
 export default function Home() {
   const [prompt, setPrompt] = useState("");
   const [style, setStyle] = useState("Photorealistic");
   const [status, setStatus] = useState<string | null>(null);
   const [stats, setStats] = useState<{ totalVisits: number; generateClicks: number }>({ totalVisits: 0, generateClicks: 0 });
-
-  const stage = process.env.NEXT_PUBLIC_MVP_STAGE || "1";
 
   // 读取本地访问与点击指标
   useEffect(() => {
@@ -28,30 +26,33 @@ export default function Home() {
       return;
     }
 
-    // 本地及服务端统计
     try {
       const newClicks = stats.generateClicks + 1;
       localStorage.setItem("mvp_clicks", newClicks.toString());
       setStats((prev) => ({ ...prev, generateClicks: newClicks }));
-
-      await fetch("/api/track", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ event: "click_generate", prompt, style, stage }),
-      });
     } catch (e) {}
 
-    if (stage === "1") {
-      setStatus("🎉 High server demand! Free Qwen 2.1 GPU slots are queueing. Bookmark this page or check back in 10 minutes!");
-    } else if (stage === "2") {
-      setStatus("👉 Please sign in with Google to get 20 free generation credits.");
-    } else {
-      window.location.href = "/pricing";
-    }
+    // 点击生成后，直接引导至付费升级与额度充值（蒋云何 Stage 3 变现模式）
+    window.location.href = "/qwen-image-generator/pricing/";
   };
 
   return (
-    <main className="w-full flex flex-col items-center px-4 py-12 md:py-20 max-w-5xl mx-auto">
+    <main className="w-full flex flex-col items-center px-4 py-10 md:py-16 max-w-5xl mx-auto">
+      {/* 顶部导航与升级按钮 */}
+      <div className="w-full flex justify-between items-center mb-8 pb-4 border-b border-zinc-800/80">
+        <div className="flex items-center gap-2 font-bold text-white text-base md:text-lg">
+          <Wand2 className="w-5 h-5 text-indigo-400" />
+          <span>Qwen 2.1 Studio</span>
+        </div>
+        <Link
+          href="/pricing/"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-md transition-all"
+        >
+          <CreditCard className="w-3.5 h-3.5" />
+          <span>Pricing & Credits</span>
+        </Link>
+      </div>
+
       {/* 顶部标签 */}
       <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-indigo-500/30 bg-indigo-500/10 text-indigo-400 text-xs md:text-sm mb-6 animate-pulse">
         <Flame className="w-4 h-4 text-orange-400" />
